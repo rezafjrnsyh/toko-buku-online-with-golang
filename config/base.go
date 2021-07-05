@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gin-gonic/gin"
 	"log"
+	"main/controllers"
 	"net/url"
 )
 
@@ -59,8 +60,7 @@ func InitRouter(db *sql.DB, r *gin.Engine) *Server {
 func (server *Server) InitializeRoutes()  {
 	// Membuat sebuah group router
 	r := server.Router.Group("v1")
-	//controller.NewArticleController(server.DB, r)
-	//controller.CreateUserController(server.Router)
+	controllers.NewCategoryController(server.DB, r)
 }
 
 func Run(r *gin.Engine) error {
