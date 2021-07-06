@@ -62,6 +62,7 @@ func (server *Server) InitializeRoutes()  {
 	r := server.Router.Group("v1")
 	controllers.NewCategoryController(server.DB, r)
 	controllers.NewBookController(server.DB, r)
+	controllers.NewMemberController(server.DB, r)
 }
 
 func Run(r *gin.Engine) error {

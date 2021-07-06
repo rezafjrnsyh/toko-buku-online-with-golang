@@ -20,7 +20,7 @@ type IBookRepository interface {
 	FindById(id int) (*Book, utils.MessageErr)
 	Update(book *Book) (*Book, utils.MessageErr)
 	Delete(id int) (int64,utils.MessageErr)
-	UpdateStock(stock int, id int) utils.MessageErr
+	UpdateStock(book *Book) (*Book , utils.MessageErr)
 }
 
 type IBookService interface {
@@ -30,4 +30,5 @@ type IBookService interface {
 	UpdateBook(book *Book, id int) (*Book, utils.MessageErr)
 	DeleteBook(id int) (int64,utils.MessageErr)
 	AddStock(stock int, id int) utils.MessageErr
+	ReduceStock(stock *Book , qty *ReqBuy, id int) *Book
 }

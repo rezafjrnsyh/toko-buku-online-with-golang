@@ -17,17 +17,18 @@ func NewBookRepo(db *sql.DB) domain.IBookRepository {
 	return &bookRepo{db: db}
 }
 
-func (c *bookRepo) UpdateStock(stock int, id int) utils.MessageErr {
+func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, utils.MessageErr) {
+	fmt.Println("In Book Repo : " , &book.Stock, &book.Id )
 	query := fmt.Sprintf("UPDATE book SET stock = ? WHERE id = ?")
-	_, updateErr := c.db.Exec(query, stock, id)
+	_, updateErr := c.db.Exec(query, &book.Stock, &book.Id)
 	if updateErr != nil {
 		//s := strings.Split(updateErr.Error(), ":")
 		//log.Println(s[1])
 		if updateErr != nil {
-			return utils.ParseError(updateErr)
+			return nil, utils.ParseError(updateErr)
 		}
 	}
-	return nil
+	return book,nil
 }
 
 func (c *bookRepo) Find() ([]*domain.Book, utils.MessageErr) {
