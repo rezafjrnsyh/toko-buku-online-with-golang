@@ -18,10 +18,13 @@ type Server struct {
 }
 
 func ConnectDB() (*sql.DB, error) {
+	//String format untuk koneksi
 	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", "root", "", "127.0.0.1", "3306", "enigma_toko")
 	val := url.Values{}
+	// menambahkan value location
 	val.Add("loc", "Asia/Jakarta")
 	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
+	// Buka koneksi database
 	db, err := sql.Open(`mysql`, dsn)
 	if err != nil {
 		log.Fatal(err)
