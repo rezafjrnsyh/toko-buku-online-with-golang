@@ -2,13 +2,21 @@ package utils
 
 import (
 	"encoding/json"
+	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 type ResponseMessage struct {
 	Code	int
 	Description	string
 	Data	interface{}
+}
+
+type Responses struct {
+	Status  int
+	Message []string
+	Error   []string
 }
 
 type MessageErr interface {
@@ -21,6 +29,10 @@ type messageErr struct {
 	ErrMessage string `json:"message"`
 	ErrStatus  int    `json:"status"`
 	ErrError   string `json:"error"`
+}
+
+type error interface {
+	Error() string
 }
 
 func (e *messageErr) Error() string {
@@ -76,4 +88,12 @@ func NewInternalServerError(message string) MessageErr {
 
 func Response(code int, desc string, data interface{}) ResponseMessage {
 	return ResponseMessage{Code: code,Description: desc, Data: data}
+}
+
+func SendResponse(c *gin.Context, response Responses) {
+	if len(response.Message) > 0 {
+		c.JSON(response.Status, map[string]interface{}{"message": strings.Join(response.Message, "; ")})
+	} else if len(response.Error) > 0 {
+		c.JSON(response.Status, map[string]interface{}{"error": strings.Join(response.Error, "; ")})
+	}
 }
