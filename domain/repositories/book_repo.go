@@ -6,6 +6,7 @@ import (
 	"log"
 	domain "main/domain/model"
 	"main/utils"
+	"strconv"
 	"strings"
 )
 
@@ -13,20 +14,31 @@ type bookRepo struct {
 	db *sql.DB
 }
 
+// NewBookRepo is a constructor
 func NewBookRepo(db *sql.DB) domain.IBookRepository {
 	return &bookRepo{db: db}
+}
+
+func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, utils.MessageErr) {
+	fmt.Println("In Book Repo : " , &book.PurchaseAmount, &book.Id )
+	query := fmt.Sprintf("UPDATE book SET purchase_amount = ? WHERE id = ?")
+	// Eksekusi query
+	_, updateErr := c.db.Exec(query, &book.PurchaseAmount, strconv.Itoa(book.Id))
+	if updateErr != nil {
+		return nil, utils.ParseError(updateErr)
+	}
+	return book,nil
 }
 
 func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, utils.MessageErr) {
 	fmt.Println("In Book Repo : " , &book.Stock, &book.Id )
 	query := fmt.Sprintf("UPDATE book SET stock = ? WHERE id = ?")
-	_, updateErr := c.db.Exec(query, &book.Stock, &book.Id)
+	// Eksekusi query
+	_, updateErr := c.db.Exec(query, &book.Stock, strconv.Itoa(book.Id))
 	if updateErr != nil {
 		//s := strings.Split(updateErr.Error(), ":")
 		//log.Println(s[1])
-		if updateErr != nil {
-			return nil, utils.ParseError(updateErr)
-		}
+		return nil, utils.ParseError(updateErr)
 	}
 	return book,nil
 }
@@ -34,11 +46,8 @@ func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, utils.MessageEr
 func (c *bookRepo) Find() ([]*domain.Book, utils.MessageErr) {
 	// Membuat object slice category
 	books := make([]*domain.Book, 0)
-	//defer a.db.Close()
-
-
 	// Untuk format query
-	query := fmt.Sprintf(`SELECT id, title, description, year, pages, language, publisher, price, stock FROM book`)
+	query := fmt.Sprintf(`SELECT id, title, description, year, pages, language, publisher, price, stock, purchase_amount FROM book`)
 
 	// Eksekusi query
 	rows, err := c.db.Query(query)
@@ -50,7 +59,7 @@ func (c *bookRepo) Find() ([]*domain.Book, utils.MessageErr) {
 	for rows.Next() {
 		book := &domain.Book{}
 		getError := rows.Scan(&book.Id,&book.Title, &book.Description, &book.Year, &book.Pages, &book.Language,
-			&book.Publisher, &book.Price, &book.Stock)
+			&book.Publisher, &book.Price, &book.Stock, &book.PurchaseAmount)
 		if err != nil {
 			return nil, utils.NewInternalServerError(fmt.Sprintf("Error when trying to get message: %s", getError.Error()))
 		}
@@ -113,12 +122,13 @@ func (c *bookRepo) Update(book *domain.Book) (*domain.Book, utils.MessageErr) {
 func (c *bookRepo) Delete(id int) (int64, utils.MessageErr) {
 	query := fmt.Sprintf("DELETE FROM book WHERE id = ?")
 	result, err := c.db.Exec(query, id)
+	fmt.Println("repo", err.Error())
 	if err != nil {
-		return 0, utils.NewInternalServerError(fmt.Sprintf("error when trying to delete message %s", err.Error()))
+		return 0, utils.ParseError(err)
 	}
-	RowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return 0, utils.NewInternalServerError(fmt.Sprintf("error when trying to get rows affected %s", err.Error()))
+	RowsAffected, errRows := result.RowsAffected()
+	if errRows != nil {
+		return 0, utils.ParseError(errRows)
 	}
 	return RowsAffected,nil
 }
