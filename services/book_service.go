@@ -13,8 +13,27 @@ type bookService struct {
 	BookRepo domain.IBookRepository
 }
 
-func (b *bookService) ReduceStock(book *domain.Book, qtyBuy *domain.ReqBuy, id int) *domain.Book{
-	book.Stock = book.Stock - qtyBuy.Qty
+func (b *bookService) AddPurchaseAmountBook(purchases []domain.Purchase) []domain.Purchase {
+	for _,purchase := range purchases{
+		purchase.Book.PurchaseAmount += purchase.Qty
+		_, _ = b.BookRepo.UpdatePurchaseAmount(purchase.Book)
+		//newPurchases = append(newPurchases, newBook)
+	}
+	return purchases
+}
+
+func (b *bookService) ReduceStock(purchases []domain.Purchase) []domain.Purchase {
+	//var newPurchases []*domain.Book
+	for _,purchase := range purchases{
+		purchase.Book.Stock -= purchase.Qty
+		_, _ = b.BookRepo.UpdateStock(purchase.Book)
+		//newPurchases = append(newPurchases, newBook)
+	}
+	return purchases
+}
+
+func (b *bookService) ReduceStockWithId(book *domain.Book, buy *domain.Buy, id int) *domain.Book{
+	book.Stock = book.Stock - buy.Qty
 	newBook,_ := b.BookRepo.UpdateStock(book)
 	return newBook
 }
