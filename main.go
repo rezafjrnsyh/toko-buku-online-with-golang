@@ -7,7 +7,7 @@ import (
 
 func main()  {
 	// fungsi untuk koneksi ke database
-	db,err := config.ConnectDB()
+	_,err := config.ConnectDB()
 
 	// apabila ada error program langsung berhenti
 	if err !=nil {
