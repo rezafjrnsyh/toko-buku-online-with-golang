@@ -10,6 +10,7 @@ import (
 )
 
 const MODE = "release"
+const PORT = ":8801"
 
 type Server struct {
 	DB	*sql.DB
@@ -44,6 +45,7 @@ func ConnectDB() (*sql.DB, error) {
 	return db, err
 }
 
+// fungsi digunakan untuk menentukan mode dan instance object router
 func CreateRouter() *gin.Engine {
 
 	// Untuk Set Mode
@@ -58,6 +60,7 @@ func CreateRouter() *gin.Engine {
 	return r
 }
 
+// fungsi ini digunakan untuk mengisi value yang ada di struct Server
 func InitRouter(db *sql.DB, r *gin.Engine) *Server {
 	return &Server{
 		DB: db,
@@ -67,13 +70,13 @@ func InitRouter(db *sql.DB, r *gin.Engine) *Server {
 
 func (server *Server) InitializeRoutes()  {
 	// Membuat sebuah group router
-	r := server.Router.Group("v1")
+	_ = server.Router.Group("v1")
 	//controller.NewArticleController(server.DB, r)
 	//controller.CreateUserController(server.Router)
 }
 
 func Run(r *gin.Engine) error {
 	fmt.Println("Listening to port 8801")
-	err := r.Run(":8801")
+	err := r.Run()
 	return err
 }
