@@ -3,13 +3,14 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	domain "main/domain/model"
 	"main/services"
 	"main/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type bookController struct {
@@ -41,7 +42,7 @@ func (b *bookController) addStockBook(c *gin.Context) {
 	id,err := strconv.Atoi(param)
 	if err != nil {
 		log.Println("Failed to converted to int")
-		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
 	var stock domain.Book
 	errBind := c.ShouldBindJSON(&stock)
@@ -76,8 +77,7 @@ func (b *bookController) AddBook(c *gin.Context) {
 	var book domain.Book
 	err := c.ShouldBindJSON(&book)
 	if err != nil {
-		theErr := utils.NewUnprocessibleEntityError("invalid json body")
-		c.JSON(theErr.Status(), theErr)
+		c.JSON(http.StatusUnprocessableEntity, utils.NewUnprocessibleEntityError("invalid json body"))
 		return
 		//s := strings.Split(err.Error(), "'")
 		//errField := fmt.Errorf("field %s can't be empty", s[3])
@@ -97,14 +97,14 @@ func (b *bookController) GetBookById(c *gin.Context) {
 	id,err := strconv.Atoi(param)
 	if err != nil {
 		log.Println("Failed to converted to int")
-		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Sory, internal server error"))
 	}
 	book, er := b.BookService.FindBookById(id)
 	if er != nil {
 		log.Println(er.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"code" : 400, "message" : "data not found"})
+		c.JSON(http.StatusNotFound, utils.NewNotFoundError("Book not found"))
 	} else {
-		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "ok", "data": book})
+		c.JSON(http.StatusOK, utils.Response(http.StatusOK, "Ok", book))
 	}
 }
 
@@ -136,7 +136,9 @@ func (b *bookController) UpdateBook(c *gin.Context) {
 }
 
 func (b *bookController) DeleteBook(c *gin.Context) {
+	// Ambil id dari request
 	param := c.Param("id")
+	// parse yang tadi string ke int
 	id,err := strconv.Atoi(param)
 	if err != nil {
 		log.Println("Failed to converted to int")
@@ -145,7 +147,7 @@ func (b *bookController) DeleteBook(c *gin.Context) {
 	result, err := b.BookService.DeleteBook(id)
 	log.Println("rows:",result)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code" : 500, "message" : "Internal server error"})
+		c.JSON(http.StatusNotFound, utils.NewNotFoundError("Book not found"))
 	} else {
 		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "Data deleted successfully", "data": result})
 	}
