@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	domain "main/domain/model"
