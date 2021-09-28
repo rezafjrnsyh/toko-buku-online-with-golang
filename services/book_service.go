@@ -5,7 +5,6 @@ import (
 	"fmt"
 	domain "main/domain/model"
 	"main/domain/repositories"
-	"main/utils"
 )
 
 type bookService struct {
@@ -42,7 +41,7 @@ func NewBookService(db *sql.DB) domain.IBookService {
 	return &bookService{db: db, BookRepo: repositories.NewBookRepo(db)}
 }
 
-func (b *bookService) AddStock(stock int, id int) utils.MessageErr {
+func (b *bookService) AddStock(stock int, id int) error {
 	book, err := b.FindBookById(id)
 	if err != nil {
 		return err
@@ -56,7 +55,7 @@ func (b *bookService) AddStock(stock int, id int) utils.MessageErr {
 	return nil
 }
 
-func (b bookService) FindBook() ([]*domain.Book, utils.MessageErr) {
+func (b bookService) FindBook() ([]*domain.Book, error) {
 	books,err := b.BookRepo.Find()
 	if err != nil {
 		return nil, err
@@ -65,7 +64,7 @@ func (b bookService) FindBook() ([]*domain.Book, utils.MessageErr) {
 	return books, nil
 }
 
-func (b *bookService) CreateBook(book *domain.Book) (*domain.Book, utils.MessageErr) {
+func (b *bookService) CreateBook(book *domain.Book) (*domain.Book, error) {
 	book, err := b.BookRepo.Create(book)
 	fmt.Println("Service :", book)
 	if err != nil {
@@ -75,7 +74,7 @@ func (b *bookService) CreateBook(book *domain.Book) (*domain.Book, utils.Message
 	return book, nil
 }
 
-func (b *bookService) FindBookById(id int) (*domain.Book, utils.MessageErr) {
+func (b *bookService) FindBookById(id int) (*domain.Book, error) {
 	book, err := b.BookRepo.FindById(id)
 	if err != nil{
 		return nil, err
@@ -84,7 +83,7 @@ func (b *bookService) FindBookById(id int) (*domain.Book, utils.MessageErr) {
 	return book, nil
 }
 
-func (b *bookService) UpdateBook(book *domain.Book, id int) (*domain.Book, utils.MessageErr) {
+func (b *bookService) UpdateBook(book *domain.Book, id int) (*domain.Book, error) {
 	data,errfound := b.FindBookById(id)
 	if errfound != nil {
 		return nil, errfound
@@ -108,7 +107,7 @@ func (b *bookService) UpdateBook(book *domain.Book, id int) (*domain.Book, utils
 	return NewBook, nil
 }
 
-func (b *bookService) DeleteBook(id int) (int64, utils.MessageErr) {
+func (b *bookService) DeleteBook(id int) (int64, error) {
 	book,errfound := b.FindBookById(id)
 	if errfound != nil{
 		return 0, errfound

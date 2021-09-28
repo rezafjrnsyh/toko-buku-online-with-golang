@@ -19,7 +19,7 @@ func NewBookRepo(db *sql.DB) domain.IBookRepository {
 	return &bookRepo{db: db}
 }
 
-func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, utils.MessageErr) {
+func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, error) {
 	fmt.Println("In Book Repo : " , &book.PurchaseAmount, &book.Id )
 	query := fmt.Sprintf("UPDATE book SET purchase_amount = ? WHERE id = ?")
 	// Eksekusi query
@@ -30,7 +30,7 @@ func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, utils.
 	return book,nil
 }
 
-func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, utils.MessageErr) {
+func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, error) {
 	fmt.Println("In Book Repo : " , &book.Stock, &book.Id )
 	query := fmt.Sprintf("UPDATE book SET stock = ? WHERE id = ?")
 	// Eksekusi query
@@ -43,7 +43,7 @@ func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, utils.MessageEr
 	return book,nil
 }
 
-func (c *bookRepo) Find() ([]*domain.Book, utils.MessageErr) {
+func (c *bookRepo) Find() ([]*domain.Book, error) {
 	// Membuat object slice category
 	books := make([]*domain.Book, 0)
 	// Untuk format query
@@ -71,7 +71,7 @@ func (c *bookRepo) Find() ([]*domain.Book, utils.MessageErr) {
 	return books, nil
 }
 
-func (c *bookRepo) Create(book *domain.Book) (*domain.Book, utils.MessageErr) {
+func (c *bookRepo) Create(book *domain.Book) (*domain.Book, error) {
 	query := fmt.Sprintf(`INSERT INTO book(title, description, year, pages, language, publisher, price, stock) VALUES(?,?,?,?,?,?,?,?)`)
 	result, err := c.db.Exec(query, &book.Title, &book.Description, &book.Year, &book.Pages, &book.Language,
 		&book.Publisher, &book.Price, &book.Stock)
@@ -91,7 +91,7 @@ func (c *bookRepo) Create(book *domain.Book) (*domain.Book, utils.MessageErr) {
 	return book, nil
 }
 
-func (c *bookRepo) FindById(id int) (*domain.Book, utils.MessageErr) {
+func (c *bookRepo) FindById(id int) (*domain.Book, error) {
 	book := new(domain.Book)
 
 	query := fmt.Sprintf(`SELECT id, title, description, year, pages, language, publisher, price, stock FROM book WHERE id=?`)
@@ -104,7 +104,7 @@ func (c *bookRepo) FindById(id int) (*domain.Book, utils.MessageErr) {
 	return book, nil
 }
 
-func (c *bookRepo) Update(book *domain.Book) (*domain.Book, utils.MessageErr) {
+func (c *bookRepo) Update(book *domain.Book) (*domain.Book, error) {
 	query := fmt.Sprintf("UPDATE book SET title = ?, description = ?, year = ?, pages = ?, language = ?, publisher = ?, price = ?, stock = ? WHERE id = ?")
 	_, updateErr := c.db.Exec(query, &book.Title, &book.Description, &book.Year, &book.Pages, &book.Language,
 		&book.Publisher, &book.Price, &book.Stock, &book.Id, )
@@ -119,7 +119,7 @@ func (c *bookRepo) Update(book *domain.Book) (*domain.Book, utils.MessageErr) {
 	return book, nil
 }
 
-func (c *bookRepo) Delete(id int) (int64, utils.MessageErr) {
+func (c *bookRepo) Delete(id int) (int64, error) {
 	query := fmt.Sprintf("DELETE FROM book WHERE id = ?")
 	result, err := c.db.Exec(query, id)
 	fmt.Println("repo", err.Error())
