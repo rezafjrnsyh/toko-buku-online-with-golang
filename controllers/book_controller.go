@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	domain "main/domain/model"
@@ -85,9 +86,8 @@ func (b *bookController) AddBook(c *gin.Context) {
 	}
 
 	newBook, error := b.BookService.CreateBook(&book)
-	if err != nil {
-		c.JSON(error.Status(), err)
-		return
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
 	c.JSON(http.StatusCreated, utils.Response(http.StatusCreated, "Book created successfully", newBook))
 }
@@ -128,9 +128,8 @@ func (b *bookController) UpdateBook(c *gin.Context) {
 	}
 
 	newBook, error := b.BookService.UpdateBook(&book, id)
-	if err != nil {
-		c.JSON(error.Status(), err)
-		return
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
 	c.JSON(http.StatusOK, utils.Response(http.StatusCreated, "Category updated successfully", newBook))
 }
