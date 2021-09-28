@@ -28,7 +28,7 @@ func NewMemberController(db *sql.DB, r *gin.RouterGroup) {
 	Controller := memberController{MemberService: services.NewMemberService(db)}
 	r.POST(SIGN_UP_PATH, Controller.SignUpMember)
 	r.POST(SIGN_IN_PATH, Controller.SignInMember)
-	r.PUT(BUYS_BOOK_PATH, Controller.Buys)
+	r.POST(BUYS_BOOK_PATH, Controller.Buys)
 	r.GET(GET_HISTORY_PATH, Controller.HistoryTrx)
 	r.PUT(ACTIVATED_PATH, Controller.ActivatedMember)
 }
@@ -44,6 +44,7 @@ func (m *memberController) HistoryTrx(c *gin.Context) {
 	histories, errget := m.MemberService.GetHistoryTrxMember(id)
 	if errget != nil {
 		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal server error"))
+		return
 	}
 	c.JSON(http.StatusOK, utils.Response(http.StatusOK,"Success", histories))
 }
@@ -51,12 +52,12 @@ func (m *memberController) HistoryTrx(c *gin.Context) {
 func (m *memberController) Buys(c *gin.Context) {
 	param := c.Param("memberId")
 	id,err := strconv.Atoi(param)
+	fmt.Println("id", id)
 	if err != nil {
 		log.Println("Failed to converted to int")
 		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
 	}
 	var requestBook domain.RequestBuyBooks
-	var buys []domain.Buy
 
 	errBind := c.ShouldBindJSON(&requestBook)
 	if errBind != nil {
@@ -64,14 +65,10 @@ func (m *memberController) Buys(c *gin.Context) {
 		c.JSON(theErr.Status(), theErr)
 		return
 	}
-	for _, v := range requestBook.Buys {
-		buys = append(buys, v)
-	}
 
-	//fmt.Println("controller: ", buys)
-	purchases, errPurchase := m.MemberService.Buys(buys, id)
+	purchases, errPurchase := m.MemberService.Buys(requestBook.Buys, id)
 	if errPurchase != nil {
-		c.JSON(http.StatusBadRequest, errPurchase)
+		c.JSON(http.StatusUnauthorized, errPurchase)
 	} else {
 		c.JSON(http.StatusOK, utils.Response(http.StatusOK, "Success", purchases))
 	}

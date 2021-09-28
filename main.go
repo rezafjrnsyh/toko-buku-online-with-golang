@@ -1,10 +1,26 @@
 package main
 
 import (
-	cors "github.com/rs/cors/wrapper/gin"
 	"log"
 	"main/config"
+
+	// "github.com/joho/godotenv"
+	cors "github.com/rs/cors/wrapper/gin"
+	"github.com/spf13/viper"
 )
+
+func init() {
+
+	viper.SetConfigType("json")
+	viper.AddConfigPath(".")
+	viper.SetConfigName("app.config")
+	_ = viper.ReadInConfig()
+    // err := godotenv.Load(".env")
+
+    // if err != nil {
+    //     log.Fatal("Error loading .env file")
+    // }
+}
 
 func main() {
 	// fungsi untuk koneksi ke database

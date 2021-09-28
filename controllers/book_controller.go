@@ -86,7 +86,8 @@ func (b *bookController) AddBook(c *gin.Context) {
 
 	newBook, error := b.BookService.CreateBook(&book)
 	if error != nil {
-		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError(error.Error()))
+		return
 	}
 	c.JSON(http.StatusCreated, utils.Response(http.StatusCreated, "Book created successfully", newBook))
 }
@@ -101,7 +102,7 @@ func (b *bookController) GetBookById(c *gin.Context) {
 	book, er := b.BookService.FindBookById(id)
 	if er != nil {
 		log.Println(er.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"code" : 400, "message" : "data not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"code" : 400, "message" : er.Error()})
 	} else {
 		c.JSON(http.StatusOK, gin.H{"code": 200, "message": "ok", "data": book})
 	}

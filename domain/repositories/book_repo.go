@@ -72,18 +72,18 @@ func (c *bookRepo) Find() ([]*domain.Book, error) {
 }
 
 func (c *bookRepo) Create(book *domain.Book) (*domain.Book, error) {
-	query := fmt.Sprintf(`INSERT INTO book(title, description, year, pages, language, publisher, price, stock) VALUES(?,?,?,?,?,?,?,?)`)
+	query := fmt.Sprintf(`INSERTd INTO book(titles, description, year, pages, language, publisher, price, stock) VALUES(?,?,?,?,?,?,?,?)`)
 	result, err := c.db.Exec(query, &book.Title, &book.Description, &book.Year, &book.Pages, &book.Language,
 		&book.Publisher, &book.Price, &book.Stock)
 	if err != nil {
 		s := strings.Split(err.Error(), ":")
 		log.Println(s[1])
-		return nil, utils.NewInternalServerError(fmt.Sprintf("error when trying to prepare user to save: %s", err.Error()))
+		return nil, utils.ParseError(err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, utils.NewInternalServerError(fmt.Sprintf("error when trying to save message: %s", err.Error()))
+		return nil, utils.ParseError(err)
 	}
 
 	book.Id = int(id)

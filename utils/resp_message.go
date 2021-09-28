@@ -62,6 +62,14 @@ func NewBadRequestError(message string) MessageErr {
 		ErrError:   "bad_request",
 	}
 }
+
+func NewUnauthorizedtError(message string) MessageErr {
+	return &messageErr{
+		ErrMessage: message,
+		ErrStatus:  http.StatusUnauthorized,
+		ErrError:   "Unauthorized",
+	}
+}
 func NewUnprocessibleEntityError(message string) MessageErr {
 	return &messageErr{
 		ErrMessage: message,
