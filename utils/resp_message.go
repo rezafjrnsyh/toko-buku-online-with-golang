@@ -74,6 +74,6 @@ func NewInternalServerError(message string) MessageErr {
 	}
 }
 
-func Response(code int, desc string, data interface{}) ResponseMessage {
-	return ResponseMessage{Status: code,Message: desc, Data: data}
+func Response(code int, message string, data interface{}) ResponseMessage {
+	return ResponseMessage{Status: code,Message: message, Data: data}
 }

@@ -84,10 +84,9 @@ func (b *bookController) AddBook(c *gin.Context) {
 		//c.JSON(http.StatusBadRequest, gin.H{"message": errField.Error(), "code": 400})
 	}
 
-	newBook, error := b.BookService.CreateBook(&book)
-	if err != nil {
-		c.JSON(error.Status(), err)
-		return
+	newBook, errCreate := b.BookService.CreateBook(&book)
+	if errCreate != nil {
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
 	c.JSON(http.StatusCreated, utils.Response(http.StatusCreated, "Book created successfully", newBook))
 }
@@ -119,9 +118,7 @@ func (b *bookController) UpdateBook(c *gin.Context) {
 	var book domain.Book
 	err := c.ShouldBindJSON(&book)
 	if err != nil {
-		theErr := utils.NewUnprocessibleEntityError("invalid json body")
-		c.JSON(theErr.Status(), theErr)
-		return
+		c.JSON(http.StatusUnprocessableEntity, utils.NewUnprocessibleEntityError("Invalid JSON Body"))
 		//s := strings.Split(err.Error(), "'")
 		//errField := fmt.Errorf("field %s can't be empty", s[3])
 		//c.JSON(http.StatusBadRequest, gin.H{"message": errField.Error(), "code": 400})
@@ -129,8 +126,8 @@ func (b *bookController) UpdateBook(c *gin.Context) {
 
 	newBook, error := b.BookService.UpdateBook(&book, id)
 	if err != nil {
-		c.JSON(error.Status(), err)
-		return
+		log.Println(error)
+		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
 	}
 	c.JSON(http.StatusOK, utils.Response(http.StatusCreated, "Category updated successfully", newBook))
 }
