@@ -17,20 +17,28 @@ type memberController struct {
 }
 
 const (
-	SIGN_UP_PATH = "/member/signup"
-	SIGN_IN_PATH = "/member/signin"
-	BUYS_BOOK_PATH = "/member/book/buys/:memberId"
-	GET_HISTORY_PATH = "/member/history/:id"
-	ACTIVATED_PATH = "/member/activated/:memberId"
+	SIGN_UP_PATH     = "/signup"
+	SIGN_IN_PATH     = "/signin"
+	BUYS_BOOK_PATH   = "/book/buys/:memberId"
+	GET_HISTORY_PATH = "/history/:id"
+	ACTIVATED_PATH   = "/activated/:memberId"
 )
 
-func NewMemberController(db *sql.DB, r *gin.RouterGroup) {
+func EnsureLoggedIn() gin.HandlerFunc {
+	return gin.Default().HandleContext
+}
+
+func NewMemberController(db *sql.DB, r *gin.Engine) {
+	// var data map[string]string
+	// data["username"] = "root"
 	Controller := memberController{MemberService: services.NewMemberService(db)}
-	r.POST(SIGN_UP_PATH, Controller.SignUpMember)
-	r.POST(SIGN_IN_PATH, Controller.SignInMember)
-	r.POST(BUYS_BOOK_PATH, Controller.Buys)
-	r.GET(GET_HISTORY_PATH, Controller.HistoryTrx)
-	r.PUT(ACTIVATED_PATH, Controller.ActivatedMember)
+	memberRoutes := r.Group("/member")
+	memberRoutes.POST(SIGN_UP_PATH, Controller.SignUpMember)
+	memberRoutes.POST(SIGN_IN_PATH, Controller.SignInMember)
+	memberRoutes.POST(BUYS_BOOK_PATH, Controller.Buys)
+	memberRoutes.GET(GET_HISTORY_PATH, Controller.HistoryTrx)
+	memberRoutes.PUT(ACTIVATED_PATH, Controller.ActivatedMember)
+
 }
 
 func (m *memberController) HistoryTrx(c *gin.Context) {
@@ -43,19 +51,19 @@ func (m *memberController) HistoryTrx(c *gin.Context) {
 
 	histories, errget := m.MemberService.GetHistoryTrxMember(id)
 	if errget != nil {
-		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal server error"))
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 		return
 	}
-	c.JSON(http.StatusOK, utils.Response(http.StatusOK,"Success", histories))
+	c.JSON(http.StatusOK, utils.Response(http.StatusOK, "Success", histories))
 }
 
 func (m *memberController) Buys(c *gin.Context) {
 	param := c.Param("memberId")
-	id,err := strconv.Atoi(param)
+	id, err := strconv.Atoi(param)
 	fmt.Println("id", id)
 	if err != nil {
 		log.Println("Failed to converted to int")
-		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
 	var requestBook domain.RequestBuyBooks
 
@@ -68,7 +76,8 @@ func (m *memberController) Buys(c *gin.Context) {
 
 	purchases, errPurchase := m.MemberService.Buys(requestBook.Buys, id)
 	if errPurchase != nil {
-		c.JSON(http.StatusUnauthorized, errPurchase)
+		c.JSON(errPurchase.Status(), errPurchase)
+		return
 	} else {
 		c.JSON(http.StatusOK, utils.Response(http.StatusOK, "Success", purchases))
 	}
@@ -99,7 +108,7 @@ func (m *memberController) Buys(c *gin.Context) {
 //	c.JSON(http.StatusOK, utils.Response(200, "Your transaction was successful", trx))
 //}
 
-func (m *memberController) SignInMember(c *gin.Context)   {
+func (m *memberController) SignInMember(c *gin.Context) {
 	var member domain.MemberLogin
 	errBind := c.ShouldBindJSON(&member)
 	if errBind != nil {
@@ -107,18 +116,18 @@ func (m *memberController) SignInMember(c *gin.Context)   {
 		c.Error(theErr)
 		return
 	}
-	_,err := m.MemberService.SignIn(&member)
-	fmt.Println("controller",err)
-	if err != nil{
+	_, err := m.MemberService.SignIn(&member)
+	fmt.Println("controller", err)
+	if err != nil {
 		fmt.Println("notfound")
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Fail"})
 		return
 	}
 	//	fmt.Println("success")
-	c.JSON(http.StatusOK, gin.H{"code": http.StatusOK,"message": "Verified"})
+	c.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "message": "Verified"})
 }
 
-func (m *memberController) SignUpMember(c *gin.Context)  {
+func (m *memberController) SignUpMember(c *gin.Context) {
 	var member domain.Member
 	errBind := c.ShouldBindJSON(&member)
 	if errBind != nil {
@@ -136,12 +145,12 @@ func (m *memberController) SignUpMember(c *gin.Context)  {
 	c.JSON(http.StatusCreated, utils.Response(http.StatusCreated, "Member registration successfully", MemberNew))
 }
 
-func (m *memberController) ActivatedMember(c *gin.Context)  {
+func (m *memberController) ActivatedMember(c *gin.Context) {
 	param := c.Param("memberId")
-	id,errParse := strconv.Atoi(param)
+	id, errParse := strconv.Atoi(param)
 	if errParse != nil {
 		log.Println("Failed to converted to int")
-		c.JSON(http.StatusInternalServerError, gin.H{"code" : 500, "message" : "Internal Server Error"})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Internal Server Error"})
 	}
 
 	err := m.MemberService.ActivatedMember(id)
