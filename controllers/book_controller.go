@@ -17,23 +17,34 @@ type bookController struct {
 }
 
 const (
-	BOOK_LIST_PATH  = "/book/list"
-	BOOK_CREATE_PATH = "/book"
-	BOOK_GET_BY_ID_PATH = "/book/:id"
-	BOOK_DELETE_PATH = "/book/:id"
-	BOOK_UPDATE_PATH = "/book/:id"
-	ADD_STOCK_BOOK_PATH = "/book/:id/stock"
+	BOOK_LIST_PATH  = "/list"
+	BOOK_CREATE_PATH = "/add"
+	BOOK_GET_BY_ID_PATH = "/:id"
+	BOOK_DELETE_PATH = "/:id"
+	BOOK_UPDATE_PATH = "/:id"
+	ADD_STOCK_BOOK_PATH = "/:id/stock"
 )
 
-func NewBookController(db *sql.DB, r *gin.RouterGroup)  {
+func NewBookController(db *sql.DB, r *gin.Engine)  {
+	// var data map[string]string
+	// data["username"] = "root"
 	Controller := bookController{BookService: services.NewBookService(db)}
-	r.GET(BOOK_LIST_PATH, Controller.lstBook)
-	r.POST(BOOK_CREATE_PATH, Controller.AddBook)
-	r.GET(BOOK_GET_BY_ID_PATH, Controller.GetBookById)
-	r.PUT(ADD_STOCK_BOOK_PATH, Controller.addStockBook)
-	r.PUT(BOOK_UPDATE_PATH, Controller.UpdateBook)
-
-	r.DELETE(BOOK_DELETE_PATH, Controller.DeleteBook)
+	bookRoutes := r.Group("/book") 
+	// bookRoutes.Use(gin.BasicAuth(data))
+	{
+		bookRoutes.GET(BOOK_LIST_PATH, Controller.lstBook)
+		bookRoutes.POST(BOOK_CREATE_PATH, Controller.AddBook)
+		bookRoutes.GET(BOOK_GET_BY_ID_PATH, Controller.GetBookById)
+		bookRoutes.PUT(ADD_STOCK_BOOK_PATH, Controller.addStockBook)
+		bookRoutes.PUT(BOOK_UPDATE_PATH, Controller.UpdateBook)
+		bookRoutes.DELETE(BOOK_DELETE_PATH, Controller.DeleteBook)
+		r.NoRoute(func(c *gin.Context) {
+			c.JSON(http.StatusNotFound, gin.H{"Code" : http.StatusNotFound, "Message": "PAGE_NOT_FOUND"})
+		})
+	}
+	// r.Any("/*any", func (c *gin.Context)  {
+	// 	c.String(404,"PAGE_NOT_FOUND",)
+	// })
 }
 
 func (b *bookController) addStockBook(c *gin.Context) {
