@@ -82,8 +82,8 @@ func InitRouter(db *sql.DB, r *gin.Engine) *Server {
 
 func (server *Server) InitializeRoutes()  {
 	// Membuat sebuah group router
-	r := server.Router.Group("v1")
-	controllers.NewCategoryController(server.DB, r)
+	r := server.Router
+	// controllers.NewCategoryController(server.DB, r)
 	controllers.NewBookController(server.DB, r)
 	controllers.NewMemberController(server.DB, r)
 }
