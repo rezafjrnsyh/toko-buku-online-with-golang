@@ -1,11 +1,12 @@
 package main
 
 import (
+	// "log"
 	"log"
 	"main/config"
 
 	// "github.com/joho/godotenv"
-	cors "github.com/rs/cors/wrapper/gin"
+	// cors "github.com/rs/cors/wrapper/gin"
 	"github.com/spf13/viper"
 )
 
@@ -25,11 +26,17 @@ func init() {
 func main() {
 	// fungsi untuk koneksi ke database
 	db, err := config.ConnectDB()
+	// gorm connection
+	// gormDb := config.NewDbConn()
+
+	// gormDb.Migration(&domain.Book{}, &domain.Member{})
 
 	// apabila ada error program langsung berhenti
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	// db.MustExec(constant.SCHEMA)
 
 	// Menginitialisasi sebuah object router
 	r := config.CreateRouter()
@@ -40,7 +47,7 @@ func main() {
 		ke aplikasi web kita itu diperbolehkan atau tidak.
 		Jika aplikasi kita tidak mengijinkan maka akan muncul error,
 		dan request pasti digagalkan oleh browser. */
-	r.Use(cors.AllowAll())
+	// r.Use(cors.AllowAll())
 
 	/*
 		Init Router digunakan untuk mengisi value Server struct
