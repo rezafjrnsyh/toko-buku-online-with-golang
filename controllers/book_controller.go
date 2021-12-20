@@ -1,15 +1,16 @@
 package controllers
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	domain "main/domain/model"
 	"main/services"
 	"main/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 )
 
 type bookController struct {
@@ -17,19 +18,19 @@ type bookController struct {
 }
 
 const (
-	BOOK_LIST_PATH  = "/list"
-	BOOK_CREATE_PATH = "/add"
+	BOOK_LIST_PATH  = "/"
+	BOOK_CREATE_PATH = "/"
 	BOOK_GET_BY_ID_PATH = "/:id"
 	BOOK_DELETE_PATH = "/:id"
 	BOOK_UPDATE_PATH = "/:id"
 	ADD_STOCK_BOOK_PATH = "/:id/stock"
 )
 
-func NewBookController(db *sql.DB, r *gin.Engine)  {
+func NewBookController(db *sqlx.DB, r *gin.Engine)  {
 	// var data map[string]string
 	// data["username"] = "root"
 	Controller := bookController{BookService: services.NewBookService(db)}
-	bookRoutes := r.Group("/book") 
+	bookRoutes := r.Group("/books") 
 	// bookRoutes.Use(gin.BasicAuth(data))
 	{
 		bookRoutes.GET(BOOK_LIST_PATH, Controller.lstBook)
@@ -90,12 +91,10 @@ func (b *bookController) AddBook(c *gin.Context) {
 		theErr := utils.NewUnprocessibleEntityError("invalid json body")
 		c.JSON(theErr.Status(), theErr)
 		return
-		//s := strings.Split(err.Error(), "'")
-		//errField := fmt.Errorf("field %s can't be empty", s[3])
-		//c.JSON(http.StatusBadRequest, gin.H{"message": errField.Error(), "code": 400})
 	}
 
 	newBook, error := b.BookService.CreateBook(&book)
+	log.Println("controller ", newBook)
 	if error != nil {
 		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError(error.Error()))
 		return
@@ -142,7 +141,7 @@ func (b *bookController) UpdateBook(c *gin.Context) {
 	if error != nil {
 		c.JSON(http.StatusInternalServerError, utils.NewInternalServerError("Internal Server Error"))
 	}
-	c.JSON(http.StatusOK, utils.Response(http.StatusCreated, "Category updated successfully", newBook))
+	c.JSON(http.StatusOK, utils.Response(http.StatusCreated, "Book updated successfully", newBook))
 }
 
 func (b *bookController) DeleteBook(c *gin.Context) {
