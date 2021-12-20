@@ -1,16 +1,17 @@
 package domain
 
 type Book struct {
-	Id	int `json:"id"`
+	ID	int `gorm:"column:id;size:36;auto_increment;primaryKey;"`
 	Title string `json:"title"`
 	Description string `json:"desc"`
-	Year int	`json:"year"`
-	Pages int	`json:"pages"`
-	Language string	`json:"language"`
-	Publisher	string `json:"publisher"`
 	Price int	`json:"price"`
 	Stock	int	`json:"stock"`
 	PurchaseAmount int	`json:"purchaseAmount"`
+	Members []*Member `gorm:"many2many:members_books"`
+}
+
+func (c *Book) TableName() string {
+	return "mst_books"
 }
 
 type IBookRepository interface {
