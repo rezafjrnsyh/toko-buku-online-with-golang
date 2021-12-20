@@ -1,22 +1,23 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	domain "main/domain/model"
 	"main/domain/repositories"
 	"main/utils"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type memberService struct {
-	db *sql.DB
-	MemberRepo domain.IMemberRepository
+	db          *sqlx.DB
+	MemberRepo  domain.IMemberRepository
 	BookService domain.IBookService
 }
 
 func (m *memberService) FindMembers() ([]*domain.Member, utils.MessageErr) {
-	members,err := m.MemberRepo.Find()
+	members, err := m.MemberRepo.Find()
 	if err != nil {
 		return nil, err
 	}
@@ -24,14 +25,15 @@ func (m *memberService) FindMembers() ([]*domain.Member, utils.MessageErr) {
 	return members, nil
 }
 
-func (m *memberService) ActivatedMember(memberId int) utils.MessageErr {
+func (m *memberService) ActivatedMember(memberId int) error {
 	member, err := m.MemberRepo.FindMemberById(memberId)
-	fmt.Println(member)
+	fmt.Println("Member Service: ", member)
 	if err != nil {
 		log.Println("Service member :", err)
 		return err
 	}
-	err = m.MemberRepo.UpdateStatus(member, 1)
+	member.Status = 1
+	err = m.MemberRepo.UpdateStatus(member)
 	if err != nil {
 		log.Println("Service member :", err)
 		return err
@@ -52,7 +54,7 @@ func (m *memberService) Buys(buys []domain.Buy, memberId int) ([]domain.Purchase
 	var purchase domain.Purchase
 	var purchases []domain.Purchase
 
-	for _,buy := range buys {
+	for _, buy := range buys {
 		member, _ := m.MemberRepo.FindMemberById(memberId)
 		if member.Status == 0 {
 			return nil, utils.NewUnauthorizedtError("Please contact admin for activation")
@@ -94,10 +96,10 @@ func (m *memberService) Buys(buys []domain.Buy, memberId int) ([]domain.Purchase
 //	return &purchase, nil
 //}
 
-func (m *memberService) SignIn(memberLogin *domain.MemberLogin) (*domain.Member,  error) {
+func (m *memberService) SignIn(memberLogin *domain.MemberLogin) (*domain.Member, error) {
 	fmt.Println("credential", memberLogin)
 	member, errFind := m.MemberRepo.FindByEmail(memberLogin)
-	fmt.Println("test",member)
+	fmt.Println("test", member)
 	fmt.Println(errFind)
 
 	if errFind != nil {
@@ -112,11 +114,12 @@ func (m *memberService) SignIn(memberLogin *domain.MemberLogin) (*domain.Member,
 	return member, nil
 }
 
-func NewMemberService(db *sql.DB) domain.IMemberService  {
+func NewMemberService(db *sqlx.DB) domain.IMemberService {
 	return &memberService{db: db, MemberRepo: repositories.NewMemberRepo(db), BookService: NewBookService(db)}
 }
 
 func (m *memberService) SignUp(member *domain.Member) (*domain.Member, utils.MessageErr) {
+	member.Status = 0
 	member, err := m.MemberRepo.AddMember(member)
 	if err != nil {
 		return nil, err

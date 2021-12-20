@@ -1,14 +1,16 @@
 package services
 
 import (
-	"database/sql"
 	"fmt"
+	"log"
 	domain "main/domain/model"
 	"main/domain/repositories"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type bookService struct {
-	db          *sql.DB
+	db          *sqlx.DB
 	BookRepo domain.IBookRepository
 }
 
@@ -37,7 +39,7 @@ func (b *bookService) ReduceStockWithId(book *domain.Book, buy *domain.Buy, id i
 	return newBook
 }
 
-func NewBookService(db *sql.DB) domain.IBookService {
+func NewBookService(db *sqlx.DB) domain.IBookService {
 	return &bookService{db: db, BookRepo: repositories.NewBookRepo(db)}
 }
 
@@ -65,6 +67,7 @@ func (b bookService) FindBook() ([]*domain.Book, error) {
 }
 
 func (b *bookService) CreateBook(book *domain.Book) (*domain.Book, error) {
+	log.Println("service", book)
 	book, err := b.BookRepo.Create(book)
 	fmt.Println("Service :", book)
 	if err != nil {
@@ -91,10 +94,6 @@ func (b *bookService) UpdateBook(book *domain.Book, id int) (*domain.Book, error
 
 	data.Title = book.Title
 	data.Description = book.Description
-	data.Year = book.Year
-	data.Pages = book.Pages
-	data.Language = book.Language
-	data.Publisher = book.Publisher
 	data.Price = book.Price
 	data.Stock = book.Stock
 
@@ -113,7 +112,7 @@ func (b *bookService) DeleteBook(id int) (int64, error) {
 		return 0, errfound
 	}
 
-	result, err := b.BookRepo.Delete(book.Id)
+	result, err := b.BookRepo.Delete(book.ID)
 	if err != nil {
 		return result, err
 	}
