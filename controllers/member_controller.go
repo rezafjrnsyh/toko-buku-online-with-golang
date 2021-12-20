@@ -1,15 +1,16 @@
 package controllers
 
 import (
-	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"log"
 	domain "main/domain/model"
 	"main/services"
 	"main/utils"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 )
 
 type memberController struct {
@@ -28,11 +29,11 @@ func EnsureLoggedIn() gin.HandlerFunc {
 	return gin.Default().HandleContext
 }
 
-func NewMemberController(db *sql.DB, r *gin.Engine) {
+func NewMemberController(db *sqlx.DB, r *gin.Engine) {
 	// var data map[string]string
 	// data["username"] = "root"
 	Controller := memberController{MemberService: services.NewMemberService(db)}
-	memberRoutes := r.Group("/member")
+	memberRoutes := r.Group("/members")
 	memberRoutes.POST(SIGN_UP_PATH, Controller.SignUpMember)
 	memberRoutes.POST(SIGN_IN_PATH, Controller.SignInMember)
 	memberRoutes.POST(BUYS_BOOK_PATH, Controller.Buys)
@@ -155,7 +156,7 @@ func (m *memberController) ActivatedMember(c *gin.Context) {
 
 	err := m.MemberService.ActivatedMember(id)
 	if err != nil {
-		c.JSON(err.Status(), err)
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Internal Server Error"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"code": http.StatusOK, "message": "Member activated successfully"})
