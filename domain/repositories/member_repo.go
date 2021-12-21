@@ -6,7 +6,6 @@ import (
 	"main/constant"
 	domain "main/domain/model"
 	"main/utils"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -86,28 +85,17 @@ func (m *memberRepo) FindHistoryByMember(memberId int) ([]*domain.ResponseHistor
 
 func (m *memberRepo) AddBooks(purchases []domain.Purchase, memberId int) ([]domain.Purchase, utils.MessageErr) {
 	newPurchases := make([]domain.Purchase, 0)
-	trx, err := m.db.Begin()
-	if err != nil {
-		return nil, utils.ParseError(err)
-	}
-	query := fmt.Sprintf(`INSERT INTO MemberhasBooks(MemberID, BookID, Quantity, TotalPrice) VALUES(?,?,?,?)`)
+	lastInsertId := 0
+	// trx, err := m.db.Begin()
 	for _, purchase := range purchases {
 		//fmt.Println("member id : ", memberId, "Book id :", purchase.Book.Id, purchase.Qty, purchase.TotalPrice)
-		result, err := m.db.Exec(query, memberId, purchase.Book.ID, purchase.Qty, purchase.TotalPrice)
-		if err != nil {
-			s := strings.Split(err.Error(), ":")
-			log.Println(s[1])
-			trx.Rollback()
-			return nil, utils.NewInternalServerError(fmt.Sprintf("error when trying to prepare user to save: %s", err.Error()))
-		}
+		row := m.db.QueryRow(constant.INSERT_BUY_BOOK, memberId, purchase.Book.ID, purchase.Qty, purchase.TotalPrice).Scan(&lastInsertId)
 
-		id, err := result.LastInsertId()
-		fmt.Println("in repo", id)
-		if err != nil {
-			return nil, utils.NewInternalServerError(fmt.Sprintf("error when trying to save message: %s", err.Error()))
+		if row != nil {
+			log.Println(row.Error())
+			return nil, utils.NewInternalServerError("Internal Server Error")
 		}
-
-		purchase.Id = int(id)
+		purchase.Id = lastInsertId
 		newPurchases = append(newPurchases, purchase)
 	}
 	return newPurchases, nil
