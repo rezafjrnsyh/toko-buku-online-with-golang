@@ -21,9 +21,8 @@ func NewBookRepo(db *sqlx.DB) domain.IBookRepository {
 
 func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, error) {
 	fmt.Println("In Book Repo : ", &book.PurchaseAmount, &book.ID)
-	query := fmt.Sprintf("UPDATE book SET purchase_amount = ? WHERE id = ?")
 	// Eksekusi query
-	_, updateErr := c.db.Exec(query, &book.PurchaseAmount, book.ID)
+	_, updateErr := c.db.Exec(constant.UPDATE_PURCHASE_AMOUNT, &book)
 	if updateErr != nil {
 		return nil, utils.ParseError(updateErr)
 	}
@@ -32,13 +31,11 @@ func (c *bookRepo) UpdatePurchaseAmount(book *domain.Book) (*domain.Book, error)
 
 func (c *bookRepo) UpdateStock(book *domain.Book) (*domain.Book, error) {
 	fmt.Println("In Book Repo : ", &book.Stock, &book.ID)
-	query := fmt.Sprintf("UPDATE book SET stock = ? WHERE id = ?")
 	// Eksekusi query
-	_, updateErr := c.db.Exec(query, &book.Stock, book.ID)
+	_, updateErr := c.db.Exec(constant.UPDATE_STOCK_BOOK, &book)
 	if updateErr != nil {
-		//s := strings.Split(updateErr.Error(), ":")
-		//log.Println(s[1])
-		return nil, utils.ParseError(updateErr)
+		log.Println(updateErr)
+		return nil, utils.NewInternalServerError("Internal Server Error")
 	}
 	return book, nil
 }
