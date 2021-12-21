@@ -13,7 +13,7 @@ import (
 
 	// _ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
-	"github.com/spf13/viper"
+	// "github.com/spf13/viper"
 )
 
 const MODE = "release"
@@ -59,18 +59,18 @@ func NewDbConn() *DbConn {
 }
 
 func ConnectDB() (*sqlx.DB, error) {
-	// get := GetEnvWithKey
-	// DB_USER := get("DB_USER")
-	// DB_PASS := get("DB_PASS")
-	// DB_HOST := get("DB_HOST")
-	// DB_PORT := get("DB_PORT")
-	// DB_NAME := get("DB_NAME")
+	get := GetEnvWithKey
+	DB_USER := get("DB_USER")
+	DB_PASS := get("DB_PASS")
+	DB_HOST := get("DB_HOST")
+	DB_PORT := get("DB_PORT")
+	DB_NAME := get("DB_NAME")
 	// DB_LOC := get("DB_LOC")
-	DB_USER := viper.GetString("database.DB_USER")
-	DB_PASS := viper.GetString("database.DB_PASS")
-	DB_HOST := viper.GetString("database.DB_HOST")
-	DB_PORT := viper.GetString("database.DB_PORT")
-	DB_NAME := viper.GetString("database.DB_NAME")
+	// DB_USER := viper.GetString("database.DB_USER")
+	// DB_PASS := viper.GetString("database.DB_PASS")
+	// DB_HOST := viper.GetString("database.DB_HOST")
+	// DB_PORT := viper.GetString("database.DB_PORT")
+	// DB_NAME := viper.GetString("database.DB_NAME")
 	// DB_LOC := viper.GetString("database.DB_LOC")
 	//String format untuk koneksi
 	dsn := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s port=%s", DB_HOST, DB_USER, DB_NAME, DB_PASS, DB_PORT)

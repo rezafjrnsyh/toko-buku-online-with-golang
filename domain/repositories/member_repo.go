@@ -89,12 +89,13 @@ func (m *memberRepo) AddBooks(purchases []domain.Purchase, memberId int) ([]doma
 	// trx, err := m.db.Begin()
 	for _, purchase := range purchases {
 		//fmt.Println("member id : ", memberId, "Book id :", purchase.Book.Id, purchase.Qty, purchase.TotalPrice)
-		row := m.db.QueryRow(constant.INSERT_BUY_BOOK, memberId, purchase.Book.ID, purchase.Qty, purchase.TotalPrice).Scan(&lastInsertId)
+		row := m.db.QueryRow(constant.INSERT_BUY_BOOK, memberId, purchase.Book.ID, purchase.Qty).Scan(&lastInsertId)
 
 		if row != nil {
-			log.Println(row.Error())
+			log.Println("repo member", row.Error())
 			return nil, utils.NewInternalServerError("Internal Server Error")
 		}
+		fmt.Println("last insert id", lastInsertId)
 		purchase.Id = lastInsertId
 		newPurchases = append(newPurchases, purchase)
 	}

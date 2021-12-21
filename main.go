@@ -5,22 +5,22 @@ import (
 	"log"
 	"main/config"
 
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 	// cors "github.com/rs/cors/wrapper/gin"
-	"github.com/spf13/viper"
+	// "github.com/spf13/viper"
 )
 
 func init() {
 
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
-	viper.SetConfigName("app.config")
-	_ = viper.ReadInConfig()
-    // err := godotenv.Load(".env")
+	// viper.SetConfigType("json")
+	// viper.AddConfigPath(".")
+	// viper.SetConfigName("app.config")
+	// _ = viper.ReadInConfig()
+    err := godotenv.Load(".env")
 
-    // if err != nil {
-    //     log.Fatal("Error loading .env file")
-    // }
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
 }
 
 func main() {

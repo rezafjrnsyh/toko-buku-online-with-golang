@@ -2,9 +2,7 @@ package constant
 
 const (
 	SCHEMA = `
-	CREATE TABLE "mst_books" ("id" bigserial,"title" text,"description" text,"price" bigint,"stock" bigint,"purchase_amount" bigint,PRIMARY KEY ("id"));
-	CREATE TABLE "mst_members" ("id" bigserial,"first_name" text,"last_name" text,"email" text,"password" text,"status" bigint,PRIMARY KEY ("id"));
-	CREATE TABLE "members_books" ("member_id" bigint,"book_id" bigint,"quantity" bigint,PRIMARY KEY ("member_id","book_id"),CONSTRAINT "fk_members_books_member" FOREIGN KEY ("member_id") REFERENCES "mst_members"("id"),CONSTRAINT "fk_members_books_book" FOREIGN KEY ("book_id") REFERENCES "mst_books"("id"))`
+	CREATE TABLE "members_books" ("member_id" bigint,"book_id" bigint,"quantity" bigint,CONSTRAINT "fk_members_books_member" FOREIGN KEY ("member_id") REFERENCES "mst_members"("id"),CONSTRAINT "fk_members_books_book" FOREIGN KEY ("book_id") REFERENCES "mst_books"("id"))`
 
 	INSERT_BOOK     = `INSERT INTO mst_books(title, description, price, stock) VALUES($1,$2,$3,$4) RETURNING id;`
 	FIND_BOOKS      = `SELECT id, title, description, price, stock FROM mst_books`
@@ -16,7 +14,7 @@ const (
 	FIND_MEMBER          = `SELECT id, first_name, last_name, email, password, status FROM mst_members WHERE id=$1`
 	UPDATE_STATUS_MEMBER = `UPDATE mst_members SET first_name=:first_name, last_name=:last_name, email=:email, password=:password, status = :status WHERE email = :email`
 
-	INSERT_BUY_BOOK        = `INSERT INTO members_books(MemberID, BookID, Quantity) VALUES($1,$2,$3,$4) RETURNING id;`
+	INSERT_BUY_BOOK        = `INSERT INTO members_books(member_id, book_id, quantity) VALUES($1,$2,$3);`
 	UPDATE_STOCK_BOOK      = `UPDATE book SET stock=:stock WHERE id=:id`
 	UPDATE_PURCHASE_AMOUNT = `UPDATE book SET purchase_amount=:purchase_amount WHERE id=:id`
 )
