@@ -15,4 +15,8 @@ const (
 	INSERT_MEMBER        = `INSERT INTO mst_members(first_name, last_name, email, password,status) VALUES($1,$2,$3,$4,$5) RETURNING id;`
 	FIND_MEMBER          = `SELECT id, first_name, last_name, email, password, status FROM mst_members WHERE id=$1`
 	UPDATE_STATUS_MEMBER = `UPDATE mst_members SET first_name=:first_name, last_name=:last_name, email=:email, password=:password, status = :status WHERE email = :email`
+
+	INSERT_BUY_BOOK        = `INSERT INTO members_books(MemberID, BookID, Quantity) VALUES($1,$2,$3,$4) RETURNING id;`
+	UPDATE_STOCK_BOOK      = `UPDATE book SET stock=:stock WHERE id=:id`
+	UPDATE_PURCHASE_AMOUNT = `UPDATE book SET purchase_amount=:purchase_amount WHERE id=:id`
 )
