@@ -6,7 +6,7 @@ type Book struct {
 	Description string `json:"desc"`
 	Price int	`json:"price"`
 	Stock	int	`json:"stock"`
-	PurchaseAmount int	`json:"purchaseAmount"`
+	PurchaseAmount int	`db:"purchase_amount" json:"purchaseAmount"`
 	Members []*Member `gorm:"many2many:members_books"`
 }
 
